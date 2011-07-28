@@ -1,0 +1,5 @@
+This python script pushes APRS position updates to spacenear.us/tracker high altitude balloon tracker.
+
+Sample usage:
+
+python aprs2tracker.py --callsigns=VA3NAT-1,VA3NAT-5
