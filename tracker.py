@@ -1,5 +1,5 @@
 from aprs_handler import APRSPacket
-import urllib2
+import urllib, urllib2
 
 class Tracker:
     def __init__(self, trackURL, trackPass):
@@ -7,16 +7,28 @@ class Tracker:
         self.trackPass = trackPass
     
     def track(self, aprsPacket):
-        url = self.trackURL + "?pass=%s" % self.trackPass \
-                  + "&vehicle=%s" % aprsPacket.source \
-        		  + "&time=%s" % aprsPacket.time \
-        		  + "&lat=%f" % aprsPacket.latitude \
-        		  + "&lon=%f" % aprsPacket.longitude \
-        		  + "&alt=%f" % (aprsPacket.altitude * 0.3048) \
-        		  + "&callsign=%s" % aprsPacket.dest \
-        		  + "&heading=%s" % aprsPacket.course \
-        		  + "&speed=%s" % (aprsPacket.speed * 1.852) \
-        		  + "&data=%s" % aprsPacket.comment
-        f = urllib2.urlopen(url)
+        vehicle = aprsPacket.source
+        if aprsPacket.symbolTable == 1 and aprsPacket.symbolCharacter in [29, 27, 84, 85, 73, 74, 52]:
+            vehicleType = 'car'
+        else:
+            vehicleType = 'balloon'
+        
+        if vehicleType == 'car':
+            vehicle += ' (Car)'
+            
+        data = urllib.urlencode({
+            'pass' : self.trackPass,
+            'vehicle' : vehicle,
+            'time' : aprsPacket.time,
+            'lat' : aprsPacket.latitude,
+            'lon' : aprsPacket.longitude,
+            'alt' : (aprsPacket.altitude * 0.3048),
+            'callsign' : aprsPacket.dest,
+            'heading' : aprsPacket.course,
+            'speed' : (aprsPacket.speed * 1.852),
+            'data' : aprsPacket.comment
+            })
+        
+        f = urllib2.urlopen(urllib2.Request(self.trackURL, data))
         f.read()
         

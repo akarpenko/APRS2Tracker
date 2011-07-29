@@ -69,9 +69,9 @@ def run():
                 defaultOpt(options.password, 'aurora'))
                 
     client = APRSClient(main.packetHandler,
-                        defaultOpt(options.host, 'lga.aprs2.net'),
+                        defaultOpt(options.host, 'ontario.aprs2.net'),
                         adjunct,
-                        defaultOpt(options.port, 10152))
+                        defaultOpt(options.port, 14580))
     client.start()
     
     #main.packetHandler('KE7MK-9>APOTC1,WIDE1-1,WIDE2-1,qAR,WT7T-6:/280229z4448.85N/10656.63Wv195/018/A=003888KE7MK Mobile Monitoring 146.820')

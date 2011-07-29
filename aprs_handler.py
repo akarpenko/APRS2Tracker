@@ -3,10 +3,12 @@
 # Code based on: http://code.google.com/p/pyaprs/source/browse/trunk
 
 from aprs_client import APRSClient
+import aprs_mice
 import datetime, re
 
+
 # define indices for icon lookups
-SYMBOLS=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+SYMBOLS="!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 TABLES='/\\'
 
 class APRSHandler:
@@ -72,8 +74,8 @@ class APRSPacket(object):
         # Coordinates: Latitude (8) | Symbol Table Identifier (1) | Longitude (9) | Symbol Code (1)
 
         # --- APRS Locations ----------------------------------------------------------------------
-        if info[0] in ('!', '=', '@', '/'): 
-            if info[0] in ('!', '='): # position without timestamp
+        if info[0] in ('!', '=', '@', '/', ';', ')'): 
+            if info[0] in ('!', '=', ')'): # position without timestamp
                 self.reportType = 'position without timestamp'
                 pat = r'(?P<lat>[0-9]{2}[0-9 ]{2}\.[0-9 ]{2})'\
                       r'(?P<latNS>[NSns])'\
@@ -82,7 +84,7 @@ class APRSPacket(object):
                       r'(?P<lonEW>[EWew])'\
                       r'(?P<symbol>.)'\
                       r'(?P<comment>.*)'
-            elif info[0] in ('@', '/'): # position with timestamp
+            elif info[0] in ('@', '/', ';'): # position with timestamp
                 self.reportType = 'position with timestamp'
                 pat = r'(?P<time>[0-9]{6}[z/h]{1})'\
                       r'(?P<lat>[0-9]{2}[0-9 ]{2}\.[0-9 ]{2})'\
@@ -211,13 +213,14 @@ class APRSPacket(object):
                 self.comment = d['comment']
             
             return True
+        
+        # --- MIC-E -------------------------------------------------------------------------------
+        elif info[0] in ("\'","`","\x1c","\x1d"):
+            self.reportType = 'mice'
+            self.hasLocation = True
+            return aprs_mice.decodeMice(self, info)
             
         '''
-        #---MIC
-        elif info[0] in ("\'","`","\x1c","\x1d"):
-            self.reportType='mice'
-            miceparse.decodeMice(self.parent)
-
         else:
             print 'Unrecognized info: %s' % info
             # Try to parse a lat/long from the packet
@@ -265,10 +268,12 @@ def run():
     #client = APRSClient(handler.packetHandler, 'aprsnz.aprs2.net', 'filter b/KE7MK-*')
     #client.start()
     
-    handler.packetHandler('KE7MK-9>APOTC1,WIDE1-1,WIDE2-1,qAR,WT7T-6:/280229z4448.85N/10656.63Wv195/018/A=003888KE7MK Mobile Monitoring 146.820')
+    #handler.packetHandler('KE7MK-9>APOTC1,WIDE1-1,WIDE2-1,qAR,WT7T-6:/280229z4448.85N/10656.63Wv195/018/A=003888KE7MK Mobile Monitoring 146.820')
     #handler.packetHandler("""JF3UYN>APU25N,TCPIP*,qAC,JG6YCL-JA:=3449.90N/13513.30E-PHG2450 Kita-Rokko Kobe WiRES6084 {UIV32N}""")
     #handler.packetHandler("""AE0SS-11>APRS:$GPRMC,151447,A,4034.5189,N,10424.4955,W,6.474,132.5,220406,10.1,E*58""")
     #handler.packetHandler("""AE0SS-11>APRS:$GPGGA,151449,4034.5163,N,10424.4937,W,1,06,1.41,21475.8,M,-21.8,M,,*4D""")
+    #handler.packetHandler("""AE6ST-2>S4QSUR,ONYX*,WIDE2-1,qAR,AK7V:`,6*l"Zj/]"?L}""")
+    handler.packetHandler("""HS1EAX-10>PWUS03,WIDE1-1,WIDE2-1,qAR,HS8NDF-1:`~2~l#Hu\"4P}144.000-144.0625 Mhz EME Freq""")
     
 if __name__=='__main__':
     run()
