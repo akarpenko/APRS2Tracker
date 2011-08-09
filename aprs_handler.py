@@ -4,7 +4,7 @@
 
 from aprs_client import APRSClient
 import aprs_mice
-import datetime, re
+import datetime, re, time
 
 
 # define indices for icon lookups
@@ -104,6 +104,8 @@ class APRSPacket(object):
             
             if d.has_key('time'):
                 self.time = self.__parseTime(d['time'])
+            else:
+                self.time = time.strftime("%H%M%S", time.gmtime())
             
             try:
                 self.latitude = int(d['lat'][:2]) + float(d['lat'][2:].replace(' ','5'))/60.0
