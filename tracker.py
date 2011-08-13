@@ -22,10 +22,10 @@ class Tracker:
             'time' : aprsPacket.time,
             'lat' : aprsPacket.latitude,
             'lon' : aprsPacket.longitude,
-            'alt' : (aprsPacket.altitude * 0.3048),
+            'alt' : round(aprsPacket.altitude * 0.3048),
             'callsign' : aprsPacket.dest,
             'heading' : aprsPacket.course,
-            'speed' : (aprsPacket.speed * 1.852),
+            'speed' : round(aprsPacket.speed * 1.852),
             'data' : aprsPacket.comment
             })
         
